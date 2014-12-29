@@ -3,7 +3,7 @@ apply plugin: 'launch4j'
 apply plugin: 'macAppBundle'
 
 mainClassName = "TWEditor.Main"
-version = "2.0.0"
+version = "3.0.0"
 
 launch4j {
     mainClassName = project.mainClassName
