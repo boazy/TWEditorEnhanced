@@ -1,16 +1,12 @@
-/*    */ package TWEditor;
-/*    */ 
-/*    */ import javax.swing.tree.DefaultMutableTreeNode;
-/*    */ 
-/*    */ public class InventoryNode extends DefaultMutableTreeNode
-/*    */ {
-/*    */   public InventoryNode(ItemTemplate itemTemplate)
-/*    */   {
-/* 20 */     super(itemTemplate);
-/*    */   }
-/*    */ }
+package TWEditor;
 
-/* Location:           /Users/boaz/Downloads/TWEditorEnhanced/TWEditor.jar
- * Qualified Name:     TWEditor.InventoryNode
- * JD-Core Version:    0.6.2
- */
+import javax.swing.tree.DefaultMutableTreeNode;
+
+public class InventoryNode extends DefaultMutableTreeNode
+{
+  public InventoryNode(ItemTemplate itemTemplate)
+  {
+    super(itemTemplate);
+  }
+}
+
