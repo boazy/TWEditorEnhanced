@@ -87,7 +87,7 @@ public class Main
             installPath = "/Applications/The Witcher.app/Contents/Resources/drive_c/Program Files/The Witcher";
             languageID = 3;
         } else if (osLinux) {
-            String locateString = "locate dialog_3.tlk | sed -e \"s|/Data/dialog_3.tlk||\"";
+            String locateString = "locate dialog_3.tlk | grep \"Witcher.*Data\" | sed -e \"s|/Data/dialog_3.tlk||\"";
             String[] cmd = {
                 "/bin/sh",
                 "-c",
