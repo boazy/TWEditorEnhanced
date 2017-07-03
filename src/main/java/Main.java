@@ -2,15 +2,18 @@ package TWEditor;
 
 import sun.misc.OSEnvironment;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.JFrame;
@@ -55,10 +58,14 @@ public class Main
     {
       String osName = System.getProperty("os.name").toLowerCase();
       boolean osMac = osName.startsWith("mac");
+      boolean osLinux = osName.startsWith("linux");
       boolean osWin = osName.startsWith("windows");
       fileSeparator = System.getProperty("file.separator");
       lineSeparator = System.getProperty("line.separator");
       tmpDir = System.getProperty("java.io.tmpdir");
+      if(osLinux) {
+          tmpDir = tmpDir + "/";
+      }
 
       databaseFile = new File(new StringBuilder().append(tmpDir).append("TWEditor.ifo").toString());
       modFile = new File(new StringBuilder().append(tmpDir).append("TWEditor.mod").toString());
@@ -78,6 +85,19 @@ public class Main
       if ((installPath == null) || (languageID == -1)) {
         if (osMac) {
             installPath = "/Applications/The Witcher.app/Contents/Resources/drive_c/Program Files/The Witcher";
+            languageID = 3;
+        } else if (osLinux) {
+            String locateString = "locate dialog_3.tlk | sed -e \"s|/Data/dialog_3.tlk||\"";
+            String[] cmd = {
+                "/bin/sh",
+                "-c",
+                locateString
+            };
+            Process process = Runtime.getRuntime().exec(cmd);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            installPath = reader.readLine();
+            reader.close();
+
             languageID = 3;
         } else if (osWin) {
             String regString = "reg query \"HKLM\\Software\\CD Projekt Red\\The Witcher\"";
