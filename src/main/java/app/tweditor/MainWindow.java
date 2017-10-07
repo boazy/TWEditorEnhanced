@@ -31,6 +31,7 @@ public class MainWindow extends JFrame
   private EquipPanel equipPanel;
   private InventoryPanel inventoryPanel;
   private QuestsPanel questsPanel;
+  private DifficultyPanel difficultyPanel;
 
   public MainWindow()
   {
@@ -152,6 +153,11 @@ public class MainWindow extends JFrame
     panel.add(this.questsPanel);
     this.tabbedPane.addTab("Quests", panel);
 
+    panel = new JPanel();
+    this.difficultyPanel = new DifficultyPanel();
+    panel.add(this.difficultyPanel);
+    this.tabbedPane.addTab("Difficulty", panel);
+
     addWindowListener(new ApplicationWindowListener(this));
   }
 
@@ -255,6 +261,9 @@ public class MainWindow extends JFrame
         DBList list = (DBList)Main.database.getTopLevelStruct().getValue();
         list = (DBList)list.getElement("Mod_PlayerList").getValue();
         list = (DBList)list.getElement(0).getValue();
+
+        DBList playerList = (DBList)Main.playerDatabase.getTopLevelStruct().getValue();
+
         this.statsPanel.setFields(list);
         this.attributesPanel.setFields(list);
         this.signsPanel.setFields(list);
@@ -262,6 +271,7 @@ public class MainWindow extends JFrame
         this.equipPanel.setFields(list);
         this.inventoryPanel.setFields(list);
         this.questsPanel.setFields(list);
+        this.difficultyPanel.setFields(list);
 
         this.tabbedPane.setSelectedIndex(0);
         this.tabbedPane.setVisible(true);
@@ -293,6 +303,7 @@ public class MainWindow extends JFrame
       this.equipPanel.getFields(list);
       this.inventoryPanel.getFields(list);
       this.questsPanel.getFields(list);
+      this.difficultyPanel.getFields(list);
 
       ProgressDialog dialog = new ProgressDialog(this, "Saving " + Main.saveDatabase.getName());
       SaveFile task = new SaveFile(dialog);
@@ -444,7 +455,7 @@ public class MainWindow extends JFrame
   private void aboutProgram()
   {
     StringBuilder info = new StringBuilder(256);
-    info.append("<html>The Witcher Save Editor Version 2.1<br>");
+    info.append("<html>The Witcher Save Editor Version 3.0.1<br>");
 
     info.append("<br>User name: ");
     info.append(System.getProperty("user.name"));

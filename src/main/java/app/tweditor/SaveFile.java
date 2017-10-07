@@ -1,15 +1,11 @@
 package app.tweditor;
 
-import java.io.File;
-import java.io.FileInputStream;
+import javax.swing.*;
 import java.io.IOException;
-import java.io.OutputStream;
-import javax.swing.SwingUtilities;
 
 public class SaveFile extends Thread
 {
-  private ProgressDialog progressDialog;
-  private File extractDirectory;
+  private final ProgressDialog progressDialog;
   private boolean saveSuccessful = false;
 
   public SaveFile(ProgressDialog dialog)
@@ -19,8 +15,6 @@ public class SaveFile extends Thread
 
   public void run()
   {
-    FileInputStream in = null;
-    OutputStream out = null;
     try
     {
       Main.database.save();
@@ -36,27 +30,24 @@ public class SaveFile extends Thread
       Main.modDatabase = modDatabase;
       this.progressDialog.updateProgress(45);
 
-      SaveEntry saveEntry = new SaveEntry(Main.savePrefix + Main.modName);
-      in = new FileInputStream(Main.modFile);
-      out = saveEntry.getOutputStream();
-      byte[] buffer = new byte[4096];
-      int count;
-      while ((count = in.read(buffer)) > 0) {
-        out.write(buffer, 0, count);
-      }
-      in.close();
-      in = null;
-      out.close();
-      out = null;
-      Main.saveDatabase.addEntry(saveEntry);
+      Main.saveDatabase.addEntry(Main.modName, Main.modFile);
       this.progressDialog.updateProgress(60);
 
-      Main.saveDatabase.save();
+      Main.playerDatabase.save();
+      Main.saveDatabase.addEntry(Main.playerName, Main.playerFile);
+      this.progressDialog.updateProgress(70);
+
+      Main.smmDatabase.save();
+      Main.saveDatabase.addEntry(Main.smmName, Main.smmFile);
       this.progressDialog.updateProgress(80);
+
+      Main.saveDatabase.save();
+      this.progressDialog.updateProgress(90);
 
       SaveDatabase saveDatabase = new SaveDatabase(Main.saveDatabase.getPath());
       saveDatabase.load();
       Main.saveDatabase = saveDatabase;
+
       this.progressDialog.updateProgress(100);
 
       this.saveSuccessful = true;
@@ -68,25 +59,8 @@ public class SaveFile extends Thread
       Main.logException("Exception while saving file", exc);
     }
 
-    try
-    {
-      if (in != null) {
-        in.close();
-      }
-      if (out != null) {
-        out.close();
-      }
-
-    }
-    catch (IOException exc)
-    {
-    }
-
-    SwingUtilities.invokeLater(new Runnable() {
-      public void run() {
-        SaveFile.this.progressDialog.closeDialog(SaveFile.this.saveSuccessful);
-      }
-    });
+    SwingUtilities.invokeLater(() ->
+            SaveFile.this.progressDialog.closeDialog(SaveFile.this.saveSuccessful));
   }
 }
 

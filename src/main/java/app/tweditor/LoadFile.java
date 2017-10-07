@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.ServerSocket;
 import java.util.ArrayList;
 import javax.swing.SwingUtilities;
 
@@ -35,19 +36,30 @@ public class LoadFile extends Thread
       if ((sep != 6) || (!Character.isDigit(saveName.charAt(0)))) {
         throw new DBException("Save name is not formatted correctly");
       }
-      String fileName = "save_" + saveName.substring(0, 6) + ".smm";
-      SaveEntry saveEntry = saveDatabase.getEntry(fileName);
+      Main.smmName = "save_" + saveName.substring(0, 6) + ".smm";
+      SaveEntry saveEntry = saveDatabase.getEntry(Main.smmName);
       if (saveEntry == null) {
-        throw new DBException("Save does not contain " + fileName);
+        throw new DBException("Save does not contain " + Main.smmName);
       }
       in = saveEntry.getInputStream();
-      Database database = new Database();
-      database.load(in);
+      if (Main.smmFile.exists()) {
+        Main.smmFile.delete();
+      }
+      byte[] buffer = new byte[4096];
+      out = new FileOutputStream(Main.smmFile);
+      int count;
+      while ((count = in.read(buffer)) > 0) {
+        out.write(buffer, 0, count);
+      }
       in.close();
       in = null;
+      out.close();
+      out = null;
+      Database smmDatabase = new Database(Main.smmFile);
+      smmDatabase.load();
       this.progressDialog.updateProgress(35);
 
-      DBList list = (DBList)database.getTopLevelStruct().getValue();
+      DBList list = (DBList)smmDatabase.getTopLevelStruct().getValue();
       String startingMod = list.getString("StartingMod");
       if (startingMod.length() == 0) {
         throw new DBException("StartingMod not found in SMM database");
@@ -76,9 +88,8 @@ public class LoadFile extends Thread
         Main.modFile.delete();
       }
 
-      byte[] buffer = new byte[4096];
+      buffer = new byte[4096];
       out = new FileOutputStream(Main.modFile);
-      int count;
       while ((count = in.read(buffer)) > 0) {
         out.write(buffer, 0, count);
       }
@@ -110,7 +121,7 @@ public class LoadFile extends Thread
       out = null;
       this.progressDialog.updateProgress(75);
 
-      database = new Database(Main.databaseFile);
+      Database database = new Database(Main.databaseFile);
       database.load();
       list = (DBList)database.getTopLevelStruct().getValue();
       element = list.getElement("Mod_PlayerList");
@@ -123,7 +134,7 @@ public class LoadFile extends Thread
       }
       this.progressDialog.updateProgress(80);
 
-      fileName = questDBName + ".qdb";
+      String fileName = questDBName + ".qdb";
       saveEntry = saveDatabase.getEntry(fileName);
       if (saveEntry == null) {
         throw new DBException("Save does not contain " + fileName);
@@ -161,11 +172,35 @@ public class LoadFile extends Thread
           Main.quests.add(quest);
         }
       }
+
+      Main.playerName = "player.utc";
+      saveEntry = saveDatabase.getEntry(Main.playerName);
+      if (saveEntry == null) {
+        throw new DBException("Save does not contain " + Main.playerName);
+      }
+      in = saveEntry.getInputStream();
+      if (Main.playerFile.exists()) {
+        Main.playerFile.delete();
+      }
+      out = new FileOutputStream(Main.playerFile);
+      while ((count = in.read(buffer)) > 0) {
+        out.write(buffer, 0, count);
+      }
+      in.close();
+      in = null;
+      out.close();
+      out = null;
+
+      Database playerDatabase = new Database(Main.playerFile);
+      playerDatabase.load();
+
       this.progressDialog.updateProgress(100);
 
-      Main.saveDatabase = saveDatabase;
-      Main.modDatabase = modDatabase;
-      Main.database = database;
+      Main.saveDatabase = saveDatabase; //.TheWitcherSave
+      Main.modDatabase = modDatabase; //.sav
+      Main.database = database; //.sav -> 'module.ifo'
+      Main.playerDatabase = playerDatabase; //player.utc
+      Main.smmDatabase = smmDatabase; //.smm
       this.loadSuccessful = true;
     } catch (DBException exc) {
       Main.logException("Save file structure is not valid", exc);

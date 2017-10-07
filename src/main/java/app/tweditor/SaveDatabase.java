@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,11 +15,11 @@ import java.util.Map;
 
 public class SaveDatabase
 {
-  private File file;
-  private String saveName;
+  private final File file;
+  private final String saveName;
   private int dataOffset;
-  private List<SaveEntry> entries;
-  private Map<String, SaveEntry> entryMap;
+  private final List<SaveEntry> entries = new ArrayList<>(160);
+  private final Map<String, SaveEntry> entryMap = new HashMap<>(160);
 
   public SaveDatabase(String filename)
   {
@@ -28,21 +29,18 @@ public class SaveDatabase
   public SaveDatabase(File file)
   {
     this.file = file;
-    this.entries = new ArrayList(160);
-    this.entryMap = new HashMap(160);
 
-    this.saveName = file.getName();
-    int sep = this.saveName.lastIndexOf(46);
+    String saveName = file.getName();
+    int sep = saveName.lastIndexOf(46);
     if (sep > 0)
-      this.saveName = this.saveName.substring(0, sep);
+      saveName = saveName.substring(0, sep);
+    this.saveName = saveName;
   }
 
   public void load()
     throws DBException, IOException
   {
-    RandomAccessFile in = new RandomAccessFile(this.file, "r");
-    try
-    {
+    try (RandomAccessFile in = new RandomAccessFile(this.file, "r")) {
       byte[] buffer = new byte[40];
       int count = in.read(buffer, 0, 12);
       if (count != 12) {
@@ -91,9 +89,6 @@ public class SaveDatabase
         this.entries.add(saveEntry);
         this.entryMap.put(saveEntry.getResourceName(), saveEntry);
       }
-    } finally {
-      if (in != null)
-        in.close();
     }
   }
 
@@ -143,12 +138,12 @@ public class SaveDatabase
 
           in.close();
         } else {
-          List resourceDataList = entry.getResourceDataList();
+          List<byte[]> resourceDataList = entry.getResourceDataList();
           residualLength = entry.getResourceLength();
           listOffset += residualLength;
           int index = 0;
           while (residualLength > 0) {
-            byte[] dataBuffer = (byte[])resourceDataList.get(index);
+            byte[] dataBuffer = resourceDataList.get(index);
             int length = Math.min(residualLength, dataBuffer.length);
             out.write(dataBuffer, 0, length);
             residualLength -= length;
@@ -161,7 +156,7 @@ public class SaveDatabase
 
       int offset = this.dataOffset;
       for (SaveEntry entry : this.entries) {
-        byte[] nameBytes = entry.getResourcePath().getBytes("UTF-8");
+        byte[] nameBytes = entry.getResourcePath().getBytes(StandardCharsets.UTF_8);
         setInteger(nameBytes.length, buffer, 0);
         out.write(buffer, 0, 4);
         out.write(nameBytes);
@@ -224,18 +219,24 @@ public class SaveDatabase
 
   public SaveEntry getEntry(String resourceName)
   {
-    SaveEntry entry = (SaveEntry)this.entryMap.get(resourceName.toLowerCase());
+    SaveEntry entry = this.entryMap.get(resourceName.toLowerCase());
     if (entry == null) {
         String resourcePath = this.getName() + "\\" + resourceName;
-        entry = (SaveEntry)this.entryMap.get(resourcePath.toLowerCase());
+        entry = this.entryMap.get(resourcePath.toLowerCase());
     }
     return entry;
+  }
+
+  public void addEntry(String pathName, File file) throws IOException {
+    SaveEntry saveEntry = new SaveEntry(Main.savePrefix + pathName);
+    saveEntry.readFromFile(file);
+    addEntry(saveEntry);
   }
 
   public void addEntry(SaveEntry entry)
   {
     String name = entry.getResourceName();
-    SaveEntry oldEntry = (SaveEntry)this.entryMap.get(name);
+    SaveEntry oldEntry = this.entryMap.get(name);
     if (oldEntry != null) {
       int index = this.entries.indexOf(oldEntry);
       this.entries.set(index, entry);

@@ -4,6 +4,10 @@ plugins {
     id 'edu.sc.seis.macAppBundle' version "2.3.0"
 }
 
+dependencies {
+    implementation 'com.google.guava:guava:29.0-jre'
+}
+
 mainClassName = "TWEditor.Main"
 version = "3.0.1"
 

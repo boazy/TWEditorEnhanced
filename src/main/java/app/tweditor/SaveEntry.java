@@ -1,6 +1,9 @@
 package app.tweditor;
 
+import com.google.common.io.ByteStreams;
+
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -10,35 +13,23 @@ import java.util.List;
 public class SaveEntry
 {
   private boolean onDisk;
-  private boolean compressed;
-  private String resourceName;
-  private String resourcePath;
+  private final boolean compressed;
+  private final String resourceName;
+  private final String resourcePath;
   private File resourceFile;
   private long resourceOffset;
   private int resourceLength;
   private List<byte[]> resourceDataList;
 
-  public SaveEntry(String path)
-  {
-    this.resourcePath = path;
-    int sep = this.resourcePath.lastIndexOf(Main.fileSeparator);
-    if (sep >= 0)
-      this.resourceName = this.resourcePath.substring(sep + 1).toLowerCase();
-    else {
-      this.resourceName = this.resourcePath.toLowerCase();
-    }
-
-    this.resourceDataList = new ArrayList();
-    this.onDisk = false;
-
-    sep = this.resourceName.lastIndexOf('.');
-    if ((sep > 0) && (this.resourceName.substring(sep).equals(".sav")))
-      this.compressed = true;
-    else
-      this.compressed = false;
+  public SaveEntry(String path) {
+    this(path, null, 0, 0, false);
   }
 
-  public SaveEntry(String path, File file, long offset, int length)
+  public SaveEntry(String path, File file, long offset, int length) {
+    this(path, file, offset, length, true);
+  }
+
+  private SaveEntry(String path, File file, long offset, int length, boolean onDisk)
   {
     this.resourcePath = path;
     int sep = this.resourcePath.lastIndexOf(Main.fileSeparator);
@@ -48,16 +39,24 @@ public class SaveEntry
       this.resourceName = this.resourcePath.toLowerCase();
     }
 
-    this.resourceFile = file;
-    this.resourceOffset = offset;
-    this.resourceLength = length;
-    this.onDisk = true;
+    if (onDisk) {
+      this.resourceFile = file;
+      this.resourceOffset = offset;
+      this.resourceLength = length;
+    } else {
+      this.resourceDataList = new ArrayList<>();
+    }
+    this.onDisk = onDisk;
 
     sep = this.resourceName.lastIndexOf('.');
-    if ((sep > 0) && (this.resourceName.substring(sep).equals(".sav")))
-      this.compressed = true;
-    else
-      this.compressed = false;
+    this.compressed = (sep > 0) && (this.resourceName.substring(sep).equals(".sav"));
+  }
+
+  public void readFromFile(File file) throws IOException {
+      try (FileInputStream in = new FileInputStream(file);
+           OutputStream out = getOutputStream()) {
+        ByteStreams.copy(in, out);
+      }
   }
 
   public String getResourceName()
@@ -85,7 +84,7 @@ public class SaveEntry
     if (onDisk)
       this.resourceDataList = null;
     else
-      this.resourceDataList = new ArrayList();
+      this.resourceDataList = new ArrayList<>();
   }
 
   public boolean isCompressed()
