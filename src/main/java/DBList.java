@@ -33,6 +33,21 @@ public class DBList extends DBElementValue
     return true;
   }
 
+  public boolean insertElement(int index,DBElement element) {
+    String label = element.getLabel();
+    if (label.length() == 0) {
+      this.elementList.add(index, element);
+      return true;
+    }
+
+    if (this.labelMap.get(label) != null) {
+      return false;
+    }
+    this.elementList.add(index, element);
+    this.labelMap.put(label, element);
+    return true;
+  }
+
   public DBElement removeElement(int index)
   {
     DBElement element = (DBElement)this.elementList.get(index);

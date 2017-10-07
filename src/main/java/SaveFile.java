@@ -51,12 +51,39 @@ public class SaveFile extends Thread
       Main.saveDatabase.addEntry(saveEntry);
       this.progressDialog.updateProgress(60);
 
+      Main.playerDatabase.save();
+      saveEntry = new SaveEntry(Main.savePrefix + Main.playerName);
+      in = new FileInputStream(Main.playerFile);
+      out = saveEntry.getOutputStream();
+      while ((count = in.read(buffer)) > 0) {
+        out.write(buffer, 0, count);
+      }
+      in.close();
+      in = null;
+      out.close();
+      out = null;
+      Main.saveDatabase.addEntry(saveEntry);
+
+      Main.smmDatabase.save();
+      saveEntry = new SaveEntry(Main.savePrefix + Main.smmName);
+      in = new FileInputStream(Main.smmFile);
+      out = saveEntry.getOutputStream();
+      while ((count = in.read(buffer)) > 0) {
+        out.write(buffer, 0, count);
+      }
+      in.close();
+      in = null;
+      out.close();
+      out = null;
+      Main.saveDatabase.addEntry(saveEntry);
+
       Main.saveDatabase.save();
       this.progressDialog.updateProgress(80);
 
       SaveDatabase saveDatabase = new SaveDatabase(Main.saveDatabase.getPath());
       saveDatabase.load();
       Main.saveDatabase = saveDatabase;
+
       this.progressDialog.updateProgress(100);
 
       this.saveSuccessful = true;
