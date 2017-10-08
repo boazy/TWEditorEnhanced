@@ -1,4 +1,4 @@
-TWEditor - Version 2.1
+TWEditor - Version 2.2
 ----------------------
 
 Overview
@@ -19,6 +19,8 @@ The 'Equipment' tab allows you to modify Geralt's equipped items and trophy.
 The 'Inventory' tab allows you to modify Geralt's inventory.
 
 The 'Quests' tab shows the game quests (Started, Completed, Failed and Not Started).  The 'Examine' button will display a description of the current quest stage (if the stage has a description).
+
+The 'Difficulty' tab allows you to modify difficulty level.
 
 
 Installation
@@ -98,3 +100,7 @@ Support for the expanded inventory management scheme implemented in the Enhanced
 Version 2.1:
 ============
 Support equipped items.
+
+Version 2.2:
+============
+Difficulty support.
