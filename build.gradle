@@ -1,9 +1,11 @@
-apply plugin: 'application'
-apply plugin: 'launch4j'
-apply plugin: 'macAppBundle'
+plugins {
+    id 'application'
+    id 'edu.sc.seis.launch4j' version '2.4.6'
+    id 'edu.sc.seis.macAppBundle' version "2.3.0"
+}
 
 mainClassName = "TWEditor.Main"
-version = "3.0.0"
+version = "3.0.1"
 
 launch4j {
     mainClassName = project.mainClassName
@@ -42,12 +44,3 @@ macAppBundle {
 """
 }
 
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'edu.sc.seis.gradle:launch4j:1.0.6'
-        classpath 'edu.sc.seis.gradle:macappbundle:2.0.0'
-    }
-}
