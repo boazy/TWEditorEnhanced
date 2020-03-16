@@ -1,5 +1,5 @@
-TWEditor - Version 2.1
-----------------------
+TWEditor - Version 3.0.1
+------------------------
 
 Overview
 ========
@@ -98,3 +98,7 @@ Support for the expanded inventory management scheme implemented in the Enhanced
 Version 2.1:
 ============
 Support equipped items.
+
+Version 3.0.1
+=============
+Provide a JAR and DMG file
