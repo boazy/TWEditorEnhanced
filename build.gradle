@@ -10,6 +10,7 @@ dependencies {
 
 mainClassName = "TWEditor.Main"
 version = "3.0.1"
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
 launch4j {
     mainClassName = project.mainClassName
